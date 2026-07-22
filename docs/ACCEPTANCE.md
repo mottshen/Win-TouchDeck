@@ -28,9 +28,9 @@ Acceptance period: 2026-07-20 through 2026-07-21
 | A20 | Five-minute stability baseline | PASS | 300 seconds, 61 samples, one connection, no errors or state changes |
 | A21 | Real diagnostics bundle redaction | PASS | No user home path, bitmap payload, or sensitive credential fields |
 
-Current installer target: `release/Win-TouchDeck-0.1.0-x64.exe`. Any pre-rename installer is superseded and must not be distributed.
+Current installer target: `release/Win-TouchDeck-0.1.0-x64.exe`. Earlier builds with the same version number are superseded by the MIT-licensed release assets.
 
-SHA-256: `AD42647911C6147CF341AC393EBC34ACE65F78A8F411957EB6F80998E6219264`
+SHA-256: `0ACF6431F781A6AFA18E78E9CC9111BD445864E6922EF17EBF34688A5A250190`
 
 Authenticode: `NotSigned`. This build is intended for engineering validation. Public distribution should include an explicit signing and SmartScreen decision.
 

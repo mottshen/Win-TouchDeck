@@ -1,6 +1,14 @@
 # Win-TouchDeck 0.1.0
 
-Initial public Windows x64 release of Win-TouchDeck, an independently developed touch-display client compatible with the Bitfocus Companion Surface protocol.
+Initial public Windows x64 release of Win-TouchDeck, an open-source touch-display client compatible with the Bitfocus Companion Surface protocol.
+
+## License
+
+Win-TouchDeck source code and official binaries are licensed under the MIT License.
+
+- Users may use, copy, modify, merge, publish, distribute, sublicense, and sell copies or derivative works.
+- The copyright notice and MIT permission notice must remain in copies or substantial portions of the software.
+- No separate proprietary end-user license applies to this release.
 
 ## Highlights
 
@@ -14,17 +22,13 @@ Initial public Windows x64 release of Win-TouchDeck, an independently developed 
 
 - 10 automated test files and 25 tests passed
 - Electron packaged-window smoke test passed
-- CycloneDX production-dependency SBOM included
-- Installer SHA-256: `13423B0D7883F16001A6142AE65675C6F7C8B4C76E909C7B71C8E50346E2E289`
+- CycloneDX production-dependency SBOM included and identifies the application license as MIT
+- Installer SHA-256: `0ACF6431F781A6AFA18E78E9CC9111BD445864E6922EF17EBF34688A5A250190`
 
-## Installation and Dependencies
+## Installation
 
 Download `Win-TouchDeck-0.1.0-x64.exe`. Bitfocus Companion is not bundled and must be installed separately from the official Bitfocus website.
 
-The installer is not digitally signed. Windows SmartScreen may display an unknown-publisher warning. Verify the SHA-256 checksum before running it.
+The installer is not digitally signed. Windows SmartScreen may display an unknown-publisher warning. Verify the published SHA-256 checksum before running it.
 
-## Independence Notice
-
-Win-TouchDeck is independently developed for compatibility with Bitfocus Companion. It is not affiliated with, endorsed by, certified by, or sponsored by Bitfocus AS, Elgato, or Corsair. Product names are trademarks of their respective owners.
-
-Use is governed by the included commercial end-user license. This release does not represent completion of a formal trademark clearance in every market.
+Win-TouchDeck is independently developed for compatibility with Bitfocus Companion. It is not affiliated with, endorsed by, certified by, or sponsored by Bitfocus AS, Elgato, or Corsair.

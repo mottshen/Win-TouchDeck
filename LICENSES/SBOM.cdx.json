@@ -8,8 +8,15 @@
       "bom-ref": "pkg:npm/win-touchdeck@0.1.0",
       "name": "win-touchdeck",
       "version": "0.1.0",
-      "description": "Commercial-ready Windows touch surface client for Bitfocus Companion",
-      "purl": "pkg:npm/win-touchdeck@0.1.0"
+      "description": "Open-source Windows touch surface client compatible with Bitfocus Companion",
+      "purl": "pkg:npm/win-touchdeck@0.1.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
     },
     "tools": {
       "components": [

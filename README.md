@@ -52,10 +52,10 @@ The renamed application migrates settings from known legacy product data locatio
 
 ## Distribution and Licensing
 
-Win-TouchDeck is proprietary software. Source availability on GitHub does not grant permission to copy, modify, redistribute, sublicense, or sell it. Customer use is governed by the commercial end-user license shipped with the release. Third-party notices are in `LICENSES/THIRD_PARTY_NOTICES.md`; Electron and Chromium notices are also included in the installed application.
+Win-TouchDeck is open-source software licensed under the [MIT License](./LICENSE). You may use, copy, modify, merge, publish, distribute, sublicense, and sell copies or derivative works, provided the copyright and MIT permission notice remain included. Third-party notices are in `LICENSES/THIRD_PARTY_NOTICES.md`; Electron and Chromium notices are also included in the installed application.
 
 This repository and installer do not include or redistribute Bitfocus Companion. Any future bundled distribution requires a separate license and component audit.
 
 Win-TouchDeck is independently developed for compatibility with Bitfocus Companion. It is not affiliated with, endorsed by, certified by, or sponsored by Bitfocus AS, Elgato, or Corsair. Bitfocus, Companion, Stream Deck, and other product names are trademarks of their respective owners. No third-party logos are used.
 
-The `Win-TouchDeck` name has not been represented as formally cleared in every market. A professional trademark search should be completed for the intended territories before general commercial release.
+The MIT license covers the software copyright. Product-name and trademark questions are separate and do not prevent customers from downloading or using the application. The compatibility and independence notice above is intended to avoid implying third-party endorsement.

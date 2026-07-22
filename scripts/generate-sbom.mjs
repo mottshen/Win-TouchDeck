@@ -67,6 +67,7 @@ const bom = {
       version: packageJson.version,
       description: packageJson.description,
       purl: appRef,
+      licenses: packageJson.license ? [{ license: { id: packageJson.license } }] : undefined,
     },
     tools: {
       components: [
