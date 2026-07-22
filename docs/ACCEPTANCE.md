@@ -30,7 +30,7 @@ Acceptance period: 2026-07-20 through 2026-07-21
 
 Current installer target: `release/Win-TouchDeck-0.1.0-x64.exe`. Earlier builds with the same version number are superseded by the MIT-licensed release assets.
 
-SHA-256: `0ACF6431F781A6AFA18E78E9CC9111BD445864E6922EF17EBF34688A5A250190`
+SHA-256: `5C20CFECA1F67A04A3BE87901023099C4854E7652D84599E0CDCDEB0D80CCDD9`
 
 Authenticode: `NotSigned`. This build is intended for engineering validation. Public distribution should include an explicit signing and SmartScreen decision.
 
