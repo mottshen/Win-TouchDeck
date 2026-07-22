@@ -2,8 +2,9 @@
   "name": "win-touchdeck",
   "version": "0.1.0",
   "private": true,
-  "description": "Commercial-ready Windows touch surface client for Bitfocus Companion",
+  "description": "Open-source Windows touch surface client compatible with Bitfocus Companion",
   "author": "mottshen",
+  "license": "MIT",
   "main": "dist-electron/main/index.js",
   "type": "module",
   "scripts": {
@@ -67,7 +68,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "license": "LICENSES/PRODUCT_LICENSE.txt"
+      "license": "LICENSES/MIT_LICENSE.txt"
     }
   }
 }
