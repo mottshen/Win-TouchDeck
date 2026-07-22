@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">Companion and Win-TouchDeck configuration and runtime flow</title>
+  <desc id="description">A layered guide showing Buttons and Surfaces as the required configuration path, with Modules, Triggers, and Remote Connections as optional capabilities.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="1" stop-color="#101d30"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000814" flood-opacity="0.42"/>
+    </filter>
+    <marker id="arrowCyan" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#36d6e7"/>
+    </marker>
+    <marker id="arrowLime" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#a8ed59"/>
+    </marker>
+    <style>
+      .title { font: 700 40px "Segoe UI", Arial, sans-serif; fill: #f4f8ff; letter-spacing: 1px; }
+      .subtitle { font: 500 22px "Segoe UI", Arial, sans-serif; fill: #a9bbd2; }
+      .step { font: 700 13px "Segoe UI", Arial, sans-serif; fill: #07111f; letter-spacing: 1.4px; }
+      .heading { font: 700 20px "Segoe UI", Arial, sans-serif; fill: #f4f8ff; letter-spacing: .6px; }
+      .item { font: 500 17px "Segoe UI", Arial, sans-serif; fill: #c8d6e8; }
+      .small { font: 500 14px "Segoe UI", Arial, sans-serif; fill: #a9bbd2; }
+      .protocolHeading { font: 700 13px "Segoe UI", Arial, sans-serif; fill: #36d6e7; letter-spacing: .8px; }
+      .protocolItem { font: 500 13px "Consolas", monospace; fill: #dbe7f6; }
+      .arrowLabel { font: 700 13px "Segoe UI", Arial, sans-serif; letter-spacing: .7px; }
+      .optionalHeading { font: 700 14px "Segoe UI", Arial, sans-serif; fill: #ffbe55; letter-spacing: 1.2px; }
+      .optionalItem { font: 500 16px "Segoe UI", Arial, sans-serif; fill: #e7d8bd; }
+      .callout { font: 700 21px "Segoe UI", Arial, sans-serif; fill: #07111f; }
+      .note { font: 500 17px "Segoe UI", Arial, sans-serif; fill: #c8d6e8; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#background)"/>
+  <circle cx="1460" cy="90" r="210" fill="#173653" opacity=".22"/>
+  <circle cx="120" cy="900" r="270" fill="#123f48" opacity=".18"/>
+
+  <text x="80" y="78" class="title">COMPANION + WIN-TOUCHDECK: CONFIGURATION AND RUNTIME FLOW</text>
+  <text x="80" y="116" class="subtitle">For a basic touch panel, configure only Buttons + Surfaces.</text>
+
+  <g transform="translate(80 152)">
+    <rect width="650" height="145" rx="18" fill="#181c27" stroke="#ffbe55" stroke-width="2" stroke-dasharray="9 8"/>
+    <text x="26" y="34" class="optionalHeading">ONLY WHEN NEEDED</text>
+    <line x1="26" y1="51" x2="624" y2="51" stroke="#ffbe55" stroke-opacity=".35"/>
+    <text x="26" y="81" class="optionalItem">Modules: external devices and services</text>
+    <text x="26" y="108" class="optionalItem">Triggers: event-driven automation</text>
+    <text x="340" y="81" class="optionalItem">Remote Connections:</text>
+    <text x="340" y="108" class="optionalItem">external control integrations</text>
+    <path d="M325 145 V185 H150" fill="none" stroke="#ffbe55" stroke-width="2" stroke-dasharray="7 7" marker-end="url(#arrowCyan)" opacity=".8"/>
+  </g>
+
+  <g transform="translate(80 350)" filter="url(#shadow)">
+    <rect width="260" height="330" rx="20" fill="#11243a" stroke="#36d6e7" stroke-width="2"/>
+    <rect x="20" y="20" width="76" height="28" rx="14" fill="#36d6e7"/>
+    <text x="58" y="39" text-anchor="middle" class="step">STEP 1</text>
+    <text x="20" y="84" class="heading">COMPANION</text>
+    <text x="20" y="110" class="heading">CONFIGURATION</text>
+    <line x1="20" y1="130" x2="240" y2="130" stroke="#36d6e7" stroke-opacity=".3"/>
+    <text x="20" y="171" class="item">Buttons</text>
+    <text x="20" y="204" class="small">Action + feedback</text>
+    <text x="20" y="232" class="small">Text, color, bitmap</text>
+    <rect x="20" y="265" width="220" height="40" rx="10" fill="#36d6e7" fill-opacity=".12"/>
+    <text x="130" y="291" text-anchor="middle" class="small">Defines what each key does</text>
+  </g>
+
+  <g transform="translate(375 350)" filter="url(#shadow)">
+    <rect width="260" height="330" rx="20" fill="#11243a" stroke="#36d6e7" stroke-width="2"/>
+    <rect x="20" y="20" width="76" height="28" rx="14" fill="#36d6e7"/>
+    <text x="58" y="39" text-anchor="middle" class="step">STEP 2</text>
+    <text x="20" y="84" class="heading">SURFACE</text>
+    <text x="20" y="110" class="heading">MAPPING</text>
+    <line x1="20" y1="130" x2="240" y2="130" stroke="#36d6e7" stroke-opacity=".3"/>
+    <text x="20" y="171" class="item">Surfaces</text>
+    <text x="20" y="204" class="small">Grid + page assignment</text>
+    <text x="20" y="232" class="small">Expose buttons to a device</text>
+    <rect x="20" y="265" width="220" height="40" rx="10" fill="#36d6e7" fill-opacity=".12"/>
+    <text x="130" y="291" text-anchor="middle" class="small">Maps keys onto a panel</text>
+  </g>
+
+  <g transform="translate(670 320)" filter="url(#shadow)">
+    <rect width="300" height="390" rx="20" fill="#142a40" stroke="#7e93ad" stroke-width="2"/>
+    <rect x="20" y="20" width="76" height="28" rx="14" fill="#7e93ad"/>
+    <text x="58" y="39" text-anchor="middle" class="step">BRIDGE</text>
+    <text x="20" y="83" class="heading">SATELLITE / SURFACE API</text>
+    <text x="20" y="116" class="small">Device registration</text>
+    <text x="20" y="143" class="small">Button state delivery</text>
+    <text x="20" y="170" class="small">Touch event return path</text>
+    <line x1="20" y1="191" x2="280" y2="191" stroke="#7e93ad" stroke-opacity=".4"/>
+    <text x="20" y="220" class="protocolHeading">COMPANION -&gt; WIN-TOUCHDECK</text>
+    <text x="20" y="246" class="protocolItem">KEY-STATE</text>
+    <text x="20" y="269" class="protocolItem">bitmap / text / color</text>
+    <text x="20" y="292" class="protocolItem">brightness / lock / page</text>
+    <text x="20" y="328" class="protocolHeading">WIN-TOUCHDECK -&gt; COMPANION</text>
+    <text x="20" y="354" class="protocolItem">ADD-DEVICE / KEY-PRESS</text>
+    <text x="20" y="377" class="protocolItem">CHANGE-PAGE / PIN</text>
+  </g>
+
+  <g transform="translate(1005 350)" filter="url(#shadow)">
+    <rect width="260" height="330" rx="20" fill="#142d35" stroke="#a8ed59" stroke-width="2"/>
+    <rect x="20" y="20" width="76" height="28" rx="14" fill="#a8ed59"/>
+    <text x="58" y="39" text-anchor="middle" class="step">STEP 3</text>
+    <text x="20" y="84" class="heading">WIN-TOUCHDECK</text>
+    <line x1="20" y1="105" x2="240" y2="105" stroke="#a8ed59" stroke-opacity=".3"/>
+    <text x="20" y="150" class="item">Display profile</text>
+    <text x="20" y="183" class="small">Rows, columns, bitmap size</text>
+    <text x="20" y="211" class="small">Render + multi-touch input</text>
+    <rect x="20" y="265" width="220" height="40" rx="10" fill="#a8ed59" fill-opacity=".12"/>
+    <text x="130" y="291" text-anchor="middle" class="small">Turns state into touch UI</text>
+  </g>
+
+  <g transform="translate(1300 350)" filter="url(#shadow)">
+    <rect width="220" height="330" rx="20" fill="#142d35" stroke="#a8ed59" stroke-width="2"/>
+    <rect x="20" y="20" width="76" height="28" rx="14" fill="#a8ed59"/>
+    <text x="58" y="39" text-anchor="middle" class="step">STEP 4</text>
+    <text x="20" y="84" class="heading">TOUCH DISPLAY</text>
+    <line x1="20" y1="105" x2="200" y2="105" stroke="#a8ed59" stroke-opacity=".3"/>
+    <rect x="30" y="145" width="160" height="96" rx="10" fill="#07111f" stroke="#a8ed59" stroke-width="2"/>
+    <g fill="#2b5160">
+      <rect x="45" y="160" width="38" height="28" rx="5"/><rect x="91" y="160" width="38" height="28" rx="5"/><rect x="137" y="160" width="38" height="28" rx="5"/>
+      <rect x="45" y="197" width="38" height="28" rx="5"/><rect x="91" y="197" width="38" height="28" rx="5" fill="#a8ed59"/><rect x="137" y="197" width="38" height="28" rx="5"/>
+    </g>
+    <text x="110" y="280" text-anchor="middle" class="item">Operator taps a key</text>
+  </g>
+
+  <path d="M340 470 H365" stroke="#36d6e7" stroke-width="5" marker-end="url(#arrowCyan)"/>
+  <path d="M635 470 H660" stroke="#36d6e7" stroke-width="5" marker-end="url(#arrowCyan)"/>
+  <path d="M970 470 H995" stroke="#36d6e7" stroke-width="5" marker-end="url(#arrowCyan)"/>
+  <path d="M1265 470 H1290" stroke="#36d6e7" stroke-width="5" marker-end="url(#arrowCyan)"/>
+  <text x="815" y="295" text-anchor="middle" class="arrowLabel" fill="#36d6e7">CONFIGURATION / VISUAL STATE</text>
+
+  <path d="M1410 735 H225" stroke="#a8ed59" stroke-width="5" marker-end="url(#arrowLime)"/>
+  <text x="820" y="765" text-anchor="middle" class="arrowLabel" fill="#a8ed59">KEY-PRESS true / false</text>
+
+  <g transform="translate(80 815)">
+    <rect width="1440" height="72" rx="18" fill="#a8ed59"/>
+    <text x="720" y="46" text-anchor="middle" class="callout">BASIC PATH: Buttons -&gt; Surfaces -&gt; Win-TouchDeck -&gt; Touch Display</text>
+  </g>
+  <text x="800" y="931" text-anchor="middle" class="note">No Module, Trigger, or Remote Connection is required when the button uses built-in</text>
+  <text x="800" y="959" text-anchor="middle" class="note">Companion actions or only needs touch feedback.</text>
+</svg>

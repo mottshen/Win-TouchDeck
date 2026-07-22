@@ -1,0 +1,139 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:npm/win-touchdeck@0.1.0",
+      "name": "win-touchdeck",
+      "version": "0.1.0",
+      "description": "Commercial-ready Windows touch surface client for Bitfocus Companion",
+      "purl": "pkg:npm/win-touchdeck@0.1.0"
+    },
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "Win-TouchDeck SBOM generator",
+          "version": "0.1.0"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "framework",
+      "bom-ref": "pkg:npm/electron@43.1.1",
+      "name": "electron",
+      "version": "43.1.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/electron@43.1.1",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://www.electronjs.org/"
+        }
+      ],
+      "properties": [
+        {
+          "name": "win-touchdeck:notice",
+          "value": "The packaged Electron runtime includes LICENSE and LICENSES.chromium.html with transitive notices."
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/react@19.2.7",
+      "name": "react",
+      "version": "19.2.7",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/react@19.2.7",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://react.dev/"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/react-dom@19.2.7",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/react-dom@19.2.7",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://react.dev/"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/scheduler@0.27.0",
+      "name": "scheduler",
+      "version": "0.27.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/scheduler@0.27.0",
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://react.dev/"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:npm/win-touchdeck@0.1.0",
+      "dependsOn": [
+        "pkg:npm/electron@43.1.1",
+        "pkg:npm/react@19.2.7",
+        "pkg:npm/react-dom@19.2.7",
+        "pkg:npm/scheduler@0.27.0"
+      ]
+    },
+    {
+      "ref": "pkg:npm/electron@43.1.1",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/react@19.2.7",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/react-dom@19.2.7",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:npm/scheduler@0.27.0",
+      "dependsOn": []
+    }
+  ]
+}

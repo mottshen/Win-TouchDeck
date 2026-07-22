@@ -1,0 +1,29 @@
+WIN-TOUCHDECK COMMERCIAL END-USER LICENSE AGREEMENT
+
+Effective date: July 22, 2026
+
+Copyright (c) 2026 mottshen. All rights reserved.
+
+This End-User License Agreement ("Agreement") is between mottshen, an individual software developer residing in Mainland China ("Licensor"), and the person or organization installing or using Win-TouchDeck ("Customer"). Legal notices to Licensor must be sent to mottshen@outlook.com.
+
+1. License Grant. Subject to this Agreement, Licensor grants Customer a limited, non-exclusive, non-transferable, non-sublicensable license to install and use Win-TouchDeck only with displays or systems supplied or expressly supported by Licensor, for Customer's internal operations.
+
+2. Restrictions. Customer may not copy except for a reasonable backup, redistribute, rent, lease, sell, sublicense, publish, circumvent technical protections, or use Win-TouchDeck to provide a hosted service. To the extent permitted by applicable law, Customer may not reverse engineer, decompile, or disassemble it. Rights that cannot lawfully be excluded remain unaffected.
+
+3. Ownership. Win-TouchDeck is licensed, not sold. Licensor and its licensors retain all intellectual-property rights. No trademark rights are granted.
+
+4. Third-Party Software. Third-party components are governed by their own license notices in the installed application. Bitfocus Companion is a separate product and is not supplied under this Agreement.
+
+5. Updates and Support. Licensor may provide, change, or discontinue updates and support under the commercial terms supplied with Customer's display or order. Updates may be subject to this Agreement or replacement terms presented with the update.
+
+6. Termination. This Agreement terminates automatically if Customer materially breaches it and fails to cure the breach where cure is required by applicable law. On termination, Customer must stop using and delete all copies, except records required by law.
+
+7. Warranty Disclaimer. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WIN-TOUCHDECK IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR UNINTERRUPTED OR ERROR-FREE OPERATION. MANDATORY CONSUMER RIGHTS ARE NOT EXCLUDED.
+
+8. Limitation of Liability. TO THE MAXIMUM EXTENT PERMITTED BY LAW, LICENSOR IS NOT LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES, LOST PROFITS, LOST DATA, OR BUSINESS INTERRUPTION. LICENSOR'S TOTAL LIABILITY WILL NOT EXCEED THE AMOUNT CUSTOMER PAID FOR THE PRODUCT OR DISPLAY WITH WHICH WIN-TOUCHDECK WAS SUPPLIED DURING THE TWELVE MONTHS BEFORE THE CLAIM. THIS LIMIT DOES NOT APPLY WHERE LIABILITY CANNOT LAWFULLY BE LIMITED.
+
+9. Export and Lawful Use. Customer must comply with applicable export-control, sanctions, privacy, and other laws and may not use Win-TouchDeck for unlawful purposes.
+
+10. Governing Law and Disputes. This Agreement is governed by the laws of the People's Republic of China as applied in Mainland China, excluding conflict-of-law rules. Any dispute arising from or relating to this Agreement shall be submitted to a People's Court with jurisdiction at Licensor's domicile, unless mandatory applicable law requires another forum. Mandatory consumer protections remain applicable.
+
+11. Entire Agreement; Severability. This Agreement and any applicable order terms form the entire agreement for Win-TouchDeck. If a provision is unenforceable, the remaining provisions continue in effect. A waiver must be in writing.

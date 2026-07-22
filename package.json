@@ -1,0 +1,73 @@
+{
+  "name": "win-touchdeck",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Commercial-ready Windows touch surface client for Bitfocus Companion",
+  "author": "mottshen",
+  "main": "dist-electron/main/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"npm:dev:electron\"",
+    "dev:electron": "wait-on tcp:5173 && npm run build:electron && electron .",
+    "build:electron": "node -e \"require('node:fs').rmSync('dist-electron',{recursive:true,force:true})\" && tsc -p electron/tsconfig.build.json",
+    "build": "npm run typecheck && vite build && npm run build:electron",
+    "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke:electron": "npm run build && electron . --smoke-test",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "sbom": "node scripts/generate-sbom.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "pack:win": "npm run build && electron-builder --win nsis --x64"
+  },
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/ws": "^8.18.1",
+    "concurrently": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "jsdom": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vitest": "latest",
+    "wait-on": "latest",
+    "ws": "^8.21.1"
+  },
+  "build": {
+    "copyright": "Copyright © 2026 mottshen",
+    "appId": "io.github.win-touchdeck.app",
+    "productName": "Win-TouchDeck",
+    "asar": true,
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "LICENSES/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png",
+      "artifactName": "Win-TouchDeck-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "license": "LICENSES/PRODUCT_LICENSE.txt"
+    }
+  }
+}

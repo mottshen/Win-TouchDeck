@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-electron/
+release/
+coverage/
+*.log
+.vite/
+.DS_Store
+companion-win64-*.exe
+artifacts/*.json
+artifacts/*.jsonl
