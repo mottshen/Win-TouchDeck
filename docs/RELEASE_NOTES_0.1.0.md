@@ -23,7 +23,7 @@ Win-TouchDeck source code and official binaries are licensed under the MIT Licen
 - 10 automated test files and 25 tests passed
 - Electron packaged-window smoke test passed
 - CycloneDX production-dependency SBOM included and identifies the application license as MIT
-- Installer SHA-256: `0ACF6431F781A6AFA18E78E9CC9111BD445864E6922EF17EBF34688A5A250190`
+- Installer SHA-256: `5C20CFECA1F67A04A3BE87901023099C4854E7652D84599E0CDCDEB0D80CCDD9`
 
 ## Installation
 
