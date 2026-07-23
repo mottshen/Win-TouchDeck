@@ -49,6 +49,11 @@
     "appId": "io.github.win-touchdeck.app",
     "productName": "Win-TouchDeck",
     "asar": true,
+    "electronLanguages": [
+      "en-US",
+      "zh-CN",
+      "de"
+    ],
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
