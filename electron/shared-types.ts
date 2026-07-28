@@ -20,7 +20,9 @@ export interface SurfaceProfile {
   gap: number
   bitmapSize: number
   kiosk: boolean
+  keepVisibleOnShowDesktop?: boolean
   showToolbar: boolean
+  showMediaBar: boolean
 }
 
 export interface AppSettings {
@@ -28,6 +30,7 @@ export interface AppSettings {
   companionUrl: string
   adminUrl: string
   launchAtLogin: boolean
+  closeToTray: boolean
   preventDisplaySleep: boolean
   theme: ThemeId
   profiles: SurfaceProfile[]
@@ -38,6 +41,7 @@ export const FALLBACK_SETTINGS: AppSettings = {
   companionUrl: 'mock://local',
   adminUrl: 'http://127.0.0.1:8000',
   launchAtLogin: false,
+  closeToTray: true,
   preventDisplaySleep: false,
   theme: 'dark',
   profiles: [{
@@ -51,5 +55,6 @@ export const FALLBACK_SETTINGS: AppSettings = {
     bitmapSize: 144,
     kiosk: false,
     showToolbar: true,
+    showMediaBar: true,
   }],
 }

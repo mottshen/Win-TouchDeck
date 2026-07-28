@@ -6,22 +6,44 @@ import {
   BrowserWindow,
   dialog,
   ipcMain,
+  Menu,
+  nativeImage,
   powerSaveBlocker,
   screen,
   shell,
+  Tray,
 } from 'electron'
 import type { OpenDialogOptions, SaveDialogOptions } from 'electron'
 import { DiagnosticsLogger, redactForDiagnostics } from '../diagnostics.js'
-import { SettingsStore } from '../settings-store.js'
+import { deleteSurfaceProfile, SettingsStore } from '../settings-store.js'
+import { WindowsMediaSession } from '../media-session.js'
+import {
+  restoreSurfaceAfterShowDesktop,
+  shouldKeepVisibleOnShowDesktop,
+} from '../show-desktop-retention.js'
+import type { MediaAction } from '../media-session.js'
+import { activateSurfaceWindow } from '../surface-window-activation.js'
+import { placeSurfaceWindow } from '../surface-window-placement.js'
+import { notifyExistingSurfaceWindows, setSurfaceToolbarVisibility } from '../surface-toolbar-settings.js'
 import type { AppSettings, DisplayInfo, SurfaceProfile } from '../shared-types.js'
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url))
 const smokeTest = process.argv.includes('--smoke-test')
 const windows = new Map<string, BrowserWindow>()
+const showDesktopRestoreTimers = new Map<string, ReturnType<typeof setTimeout>>()
 let settingsStore: SettingsStore
 let diagnostics: DiagnosticsLogger
 let currentSettings: AppSettings
 let displaySleepBlocker: number | null = null
+let tray: Tray | null = null
+let isQuitting = false
+const mediaSession = new WindowsMediaSession()
+
+function appIconPath() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'icon.png')
+    : path.join(process.cwd(), 'assets', 'icon.png')
+}
 
 async function migrateLegacySettings(userDataPath: string): Promise<boolean> {
   const target = path.join(userDataPath, 'settings.json')
@@ -69,6 +91,72 @@ function rendererUrl(profileId: string, displayId: string) {
   return `${path.join(currentDir, '../../dist/index.html')}?${query}`
 }
 
+function scheduleShowDesktopRestore(profileId: string, window: BrowserWindow) {
+  const profile = currentSettings.profiles.find((item) => item.id === profileId && item.enabled)
+  if (!profile) return
+  const display = displayForProfile(profile)
+  const isPrimaryDisplay = display.id === screen.getPrimaryDisplay().id
+  if (!shouldKeepVisibleOnShowDesktop(profile.keepVisibleOnShowDesktop, isPrimaryDisplay)) return
+
+  const existingTimer = showDesktopRestoreTimers.get(profileId)
+  if (existingTimer) clearTimeout(existingTimer)
+  showDesktopRestoreTimers.set(profileId, setTimeout(() => {
+    showDesktopRestoreTimers.delete(profileId)
+    const currentProfile = currentSettings.profiles.find((item) => item.id === profileId && item.enabled)
+    if (!currentProfile || window.isDestroyed()) return
+
+    const currentDisplay = displayForProfile(currentProfile)
+    const isCurrentPrimaryDisplay = currentDisplay.id === screen.getPrimaryDisplay().id
+    if (!shouldKeepVisibleOnShowDesktop(currentProfile.keepVisibleOnShowDesktop, isCurrentPrimaryDisplay)) return
+
+    if (restoreSurfaceAfterShowDesktop(window, currentDisplay.bounds, currentProfile.kiosk)) {
+      diagnostics.log('info', 'surface.restored-after-show-desktop', {
+        profileId,
+        displayId: String(currentDisplay.id),
+        kiosk: currentProfile.kiosk,
+      })
+    }
+  }, 120))
+}
+
+function showAllSurfaceWindows() {
+  let focused = false
+  for (const window of windows.values()) {
+    if (window.isDestroyed()) continue
+    if (window.isMinimized()) window.restore()
+    window.show()
+    if (!focused) {
+      window.focus()
+      focused = true
+    }
+  }
+}
+
+function configureTray(settings: AppSettings) {
+  if (!settings.closeToTray) {
+    tray?.destroy()
+    tray = null
+    return
+  }
+  if (tray && !tray.isDestroyed()) return
+
+  const icon = nativeImage.createFromPath(appIconPath()).resize({ width: 16, height: 16 })
+  tray = new Tray(icon)
+  tray.setToolTip('Win-TouchDeck')
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Show All Windows', click: showAllSurfaceWindows },
+    { type: 'separator' },
+    {
+      label: 'Quit Win-TouchDeck',
+      click: () => {
+        isQuitting = true
+        app.quit()
+      },
+    },
+  ]))
+  tray.on('double-click', showAllSurfaceWindows)
+}
+
 async function createSurfaceWindow(profile: SurfaceProfile) {
   const display = displayForProfile(profile)
   const displayId = String(display.id)
@@ -83,6 +171,7 @@ async function createSurfaceWindow(profile: SurfaceProfile) {
     show: false,
     backgroundColor: '#090c10',
     autoHideMenuBar: true,
+    icon: appIconPath(),
     webPreferences: {
       // Electron sandboxed preloads must be CommonJS. TypeScript emits the
       // `.cts` source as `.cjs`, avoiding the silent ESM preload failure that
@@ -94,7 +183,19 @@ async function createSurfaceWindow(profile: SurfaceProfile) {
     },
   })
   windows.set(profile.id, window)
-  window.on('closed', () => windows.delete(profile.id))
+  window.on('close', (event) => {
+    if (isQuitting || !currentSettings.closeToTray) return
+    event.preventDefault()
+    window.hide()
+    diagnostics.log('info', 'surface.hidden-to-tray', { profileId: profile.id })
+  })
+  window.on('minimize', () => scheduleShowDesktopRestore(profile.id, window))
+  window.on('closed', () => {
+    const restoreTimer = showDesktopRestoreTimers.get(profile.id)
+    if (restoreTimer) clearTimeout(restoreTimer)
+    showDesktopRestoreTimers.delete(profile.id)
+    windows.delete(profile.id)
+  })
   window.once('ready-to-show', () => window.show())
   if (app.isPackaged || smokeTest) await window.loadFile(path.join(currentDir, '../../dist/index.html'), { query: { profile: profile.id, display: displayId } })
   else await window.loadURL(rendererUrl(profile.id, displayId))
@@ -104,16 +205,23 @@ async function reconcileWindows() {
   const activeProfiles = currentSettings.profiles.filter((profile) => profile.enabled)
   const desiredIds = new Set(activeProfiles.map((profile) => profile.id))
   for (const [id, window] of windows) {
-    if (!desiredIds.has(id)) window.close()
+    if (!desiredIds.has(id)) window.destroy()
   }
   for (const profile of activeProfiles) {
     const existing = windows.get(profile.id)
     if (!existing || existing.isDestroyed()) await createSurfaceWindow(profile)
     else {
       const display = displayForProfile(profile)
-      existing.setBounds(display.bounds)
-      existing.setKiosk(profile.kiosk)
-      existing.webContents.send('settings:changed', currentSettings)
+      const placement = await placeSurfaceWindow(existing, display.bounds, profile.kiosk)
+      diagnostics.log(placement.boundsMatch ? 'info' : 'warn', 'surface.window-placed', {
+        profileId: profile.id,
+        displayId: String(display.id),
+        moved: placement.moved,
+        kiosk: profile.kiosk,
+        boundsMatch: placement.boundsMatch,
+        actualBounds: existing.isDestroyed() ? undefined : existing.getBounds(),
+      })
+      if (!existing.isDestroyed()) existing.webContents.send('settings:changed', currentSettings)
     }
   }
 }
@@ -136,11 +244,40 @@ function registerIpc() {
   })
   ipcMain.handle('displays:list', () => listDisplays())
   ipcMain.handle('settings:get', () => currentSettings)
-  ipcMain.handle('settings:save', async (_event, input) => {
+  ipcMain.handle('settings:save', async (_event, input, activeProfileId: unknown) => {
     currentSettings = await settingsStore.write(input)
     diagnostics.log('info', 'settings.saved', { profiles: currentSettings.profiles.length })
     configurePowerAndLogin(currentSettings)
+    configureTray(currentSettings)
     await reconcileWindows()
+    activateSurfaceWindow(windows, currentSettings, activeProfileId)
+    return currentSettings
+  })
+  ipcMain.handle('settings:delete-surface', async (_event, profileId: unknown) => {
+    const nextSettings = deleteSurfaceProfile(currentSettings, profileId)
+    if (!nextSettings) throw new Error('Surface could not be deleted. At least one surface must remain.')
+    currentSettings = await settingsStore.write(nextSettings)
+    diagnostics.log('info', 'settings.surface-deleted', {
+      profileId,
+      profilesRemaining: currentSettings.profiles.length,
+    })
+
+    // Return the persisted result before destroying the renderer that invoked
+    // this handler. The short delay also gives an active Satellite connection
+    // time to flush REMOVE-DEVICE to Companion.
+    setTimeout(() => {
+      void reconcileWindows()
+        .then(() => activateSurfaceWindow(windows, currentSettings, currentSettings.profiles[0]?.id))
+        .catch((error) => diagnostics.log('error', 'settings.surface-delete-reconcile-failed', error))
+    }, 75)
+    return currentSettings
+  })
+  ipcMain.handle('settings:set-toolbar', async (_event, profileId: unknown, visible: unknown) => {
+    const nextSettings = setSurfaceToolbarVisibility(currentSettings, profileId, visible)
+    if (!nextSettings) throw new Error('Invalid surface toolbar update')
+    currentSettings = await settingsStore.write(nextSettings)
+    diagnostics.log('info', 'settings.toolbar-updated', { profileId, visible })
+    notifyExistingSurfaceWindows(windows, currentSettings)
     return currentSettings
   })
   ipcMain.handle('settings:export', async (event, input) => {
@@ -168,6 +305,7 @@ function registerIpc() {
     currentSettings = await settingsStore.importFrom(result.filePaths[0])
     diagnostics.log('info', 'settings.imported', { path: path.basename(result.filePaths[0]), profiles: currentSettings.profiles.length })
     configurePowerAndLogin(currentSettings)
+    configureTray(currentSettings)
     await reconcileWindows()
     return currentSettings
   })
@@ -218,12 +356,21 @@ function registerIpc() {
     window?.setKiosk(false)
     window?.setFullScreen(false)
   })
+  ipcMain.handle('media:get-state', () => mediaSession.getState())
+  ipcMain.handle('media:control', (_event, action: unknown, value?: unknown) => {
+    if (!['shuffle', 'previous', 'toggle', 'next', 'repeat', 'seek'].includes(String(action))) throw new Error('Unsupported media action')
+    return mediaSession.control(action as MediaAction, typeof value === 'number' ? value : undefined)
+  })
 }
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', () => windows.values().next().value?.focus())
+  if (process.platform === 'win32') app.setAppUserModelId('io.github.win-touchdeck.app')
+  app.on('second-instance', showAllSurfaceWindows)
+  app.on('before-quit', () => {
+    isQuitting = true
+  })
   app.whenReady().then(async () => {
     const userDataPath = app.getPath('userData')
     const migratedLegacySettings = await migrateLegacySettings(userDataPath)
@@ -235,6 +382,7 @@ if (!app.requestSingleInstanceLock()) {
     if (settingsStore.recoveredFromBackup) diagnostics.log('warn', 'settings.recovered-from-backup')
     registerIpc()
     configurePowerAndLogin(currentSettings)
+    configureTray(currentSettings)
     await reconcileWindows()
 
     if (smokeTest) {
@@ -282,4 +430,6 @@ if (!app.requestSingleInstanceLock()) {
 process.on('uncaughtExceptionMonitor', (error) => diagnostics?.log('error', 'process.uncaught-exception', { name: error.name, message: error.message, stack: error.stack }))
 process.on('unhandledRejection', (reason) => diagnostics?.log('error', 'process.unhandled-rejection', reason))
 
-app.on('window-all-closed', () => app.quit())
+app.on('window-all-closed', () => {
+  if (!currentSettings?.closeToTray) app.quit()
+})

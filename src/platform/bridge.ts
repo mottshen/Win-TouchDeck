@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS, normalizeSettings } from '../config/defaults'
-import type { AppSettings, DesktopBridge, DisplayInfo, RuntimeInfo } from '../types'
+import type { AppSettings, DesktopBridge, DisplayInfo, MediaState, RuntimeInfo } from '../types'
 
 const browserDisplay = (): DisplayInfo => ({
   id: 'browser',
@@ -13,6 +13,31 @@ const browserDisplay = (): DisplayInfo => ({
 
 const SETTINGS_KEY = 'win-touchdeck.settings'
 const LEGACY_SETTINGS_KEY = 'touchdeck.settings'
+
+const MOCK_TRACK_STARTED = Date.now() - 74_000
+const MOCK_DURATION = 224_000
+
+function mockMediaState(): MediaState {
+  return {
+    available: true,
+    source: 'Spotify (browser preview)',
+    title: 'Touch Surface Preview',
+    artist: 'Win-TouchDeck',
+    album: 'Interface Demo',
+    artworkDataUrl: '',
+    isPlaying: true,
+    isShuffleActive: false,
+    repeatMode: 'none',
+    positionMs: (Date.now() - MOCK_TRACK_STARTED) % MOCK_DURATION,
+    durationMs: MOCK_DURATION,
+    canPrevious: true,
+    canToggle: true,
+    canNext: true,
+    canShuffle: true,
+    canRepeat: true,
+    canSeek: true,
+  }
+}
 
 function readBrowserSettings(): AppSettings {
   const current = localStorage.getItem(SETTINGS_KEY)
@@ -59,8 +84,30 @@ const browserBridge: DesktopBridge = {
       return structuredClone(DEFAULT_SETTINGS)
     }
   },
-  async saveSettings(input: AppSettings) {
+  async saveSettings(input: AppSettings, _activeProfileId?: string) {
     const settings = normalizeSettings(input)
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+    return settings
+  },
+  async deleteSurface(profileId: string) {
+    const current = readBrowserSettings()
+    if (current.profiles.length <= 1) throw new Error('At least one surface must remain')
+    if (!current.profiles.some((profile) => profile.id === profileId)) throw new Error('Surface not found')
+    const settings = normalizeSettings({
+      ...current,
+      profiles: current.profiles.filter((profile) => profile.id !== profileId),
+    })
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+    return settings
+  },
+  async setToolbarVisibility(profileId: string, visible: boolean) {
+    const current = readBrowserSettings()
+    const settings = normalizeSettings({
+      ...current,
+      profiles: current.profiles.map((profile) => profile.id === profileId
+        ? { ...profile, showToolbar: visible }
+        : profile),
+    })
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
     return settings
   },
@@ -88,6 +135,12 @@ const browserBridge: DesktopBridge = {
   },
   async setKiosk() {},
   async exitKiosk() {},
+  async getMediaState() {
+    return mockMediaState()
+  },
+  async controlMedia(_action, _value) {
+    return mockMediaState()
+  },
   onDisplaysChanged() {
     return () => undefined
   },

@@ -47,6 +47,10 @@ export class MockSurfaceController implements SurfaceController {
     if (this.timer) clearInterval(this.timer)
   }
 
+  remove(): void {
+    this.disconnect()
+  }
+
   press(index: number, pressed: boolean): void {
     const button = this.state.buttons[index]
     if (!button) return

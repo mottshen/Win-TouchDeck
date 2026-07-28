@@ -122,6 +122,12 @@ export class SatelliteSession {
     return `PINCODE-KEY DEVICEID=${this.descriptor.id} KEY=${key}`
   }
 
+  remove(): string | null {
+    if (!this.registered) return null
+    this.registered = false
+    return `REMOVE-DEVICE DEVICEID=${this.descriptor.id}`
+  }
+
   private registrationEffects(): SessionEffect[] {
     const { id, name, columns, rows, bitmapSize } = this.descriptor
     const args = [

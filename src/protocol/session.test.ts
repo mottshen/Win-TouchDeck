@@ -20,6 +20,8 @@ describe('SatelliteSession', () => {
     expect(session.snapshot().status).toBe('online')
     expect(session.press(4, true)).toBe('KEY-PRESS DEVICEID=surface-1 KEY=4 PRESSED=true')
     expect(session.changePage(-1)).toContain('DIRECTION=0')
+    expect(session.remove()).toBe('REMOVE-DEVICE DEVICEID=surface-1')
+    expect(session.press(4, true)).toBeNull()
   })
 
   it('supports legacy API without new arguments', () => {

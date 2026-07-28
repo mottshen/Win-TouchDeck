@@ -43,5 +43,7 @@ The build uses `electron/tsconfig.build.json` to exclude test source files. Befo
 3. Hold two buttons for five seconds and release them in both possible orders.
 4. While holding a button, switch windows, disconnect the display, lock Windows, and put the system to sleep; confirm that Companion receives a release.
 5. Hot-plug the secondary display 20 times and confirm that its window returns to the assigned display.
-6. Run for 72 hours while testing Companion restarts, network interruptions, and system sleep.
-7. Confirm that logs contain no unhandled exceptions, sustained memory growth, or reconnect storms.
+6. With **Keep Visible When Showing Desktop** enabled for the secondary Surface, press `Win+D`; confirm the primary display shows the desktop, the Surface returns on the secondary display, and keyboard focus remains on the primary display.
+7. Disable the option and repeat `Win+D`; confirm the secondary Surface follows the normal Windows Show Desktop behavior.
+8. Run for 72 hours while testing Companion restarts, network interruptions, and system sleep.
+9. Confirm that logs contain no unhandled exceptions, sustained memory growth, or reconnect storms.

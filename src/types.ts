@@ -21,7 +21,31 @@ export interface SurfaceProfile {
   gap: number
   bitmapSize: number
   kiosk: boolean
+  keepVisibleOnShowDesktop?: boolean
   showToolbar: boolean
+  showMediaBar: boolean
+}
+
+export type MediaControlAction = 'shuffle' | 'previous' | 'toggle' | 'next' | 'repeat' | 'seek'
+
+export interface MediaState {
+  available: boolean
+  source: string
+  title: string
+  artist: string
+  album: string
+  artworkDataUrl: string
+  isPlaying: boolean
+  isShuffleActive: boolean
+  repeatMode: 'none' | 'list' | 'track'
+  positionMs: number
+  durationMs: number
+  canPrevious: boolean
+  canToggle: boolean
+  canNext: boolean
+  canShuffle: boolean
+  canRepeat: boolean
+  canSeek: boolean
 }
 
 export interface AppSettings {
@@ -29,6 +53,7 @@ export interface AppSettings {
   companionUrl: string
   adminUrl: string
   launchAtLogin: boolean
+  closeToTray: boolean
   preventDisplaySleep: boolean
   theme: ThemeId
   profiles: SurfaceProfile[]
@@ -45,7 +70,9 @@ export interface DesktopBridge {
   getRuntimeInfo(): Promise<RuntimeInfo>
   getDisplays(): Promise<DisplayInfo[]>
   getSettings(): Promise<AppSettings>
-  saveSettings(settings: AppSettings): Promise<AppSettings>
+  saveSettings(settings: AppSettings, activeProfileId?: string): Promise<AppSettings>
+  deleteSurface(profileId: string): Promise<AppSettings>
+  setToolbarVisibility(profileId: string, visible: boolean): Promise<AppSettings>
   exportSettings(settings: AppSettings): Promise<{ saved: boolean; path?: string }>
   importSettings(): Promise<AppSettings | null>
   exportDiagnostics(): Promise<{ saved: boolean; path?: string }>
@@ -53,6 +80,8 @@ export interface DesktopBridge {
   openAdmin(url: string): Promise<void>
   setKiosk(enabled: boolean): Promise<void>
   exitKiosk(): Promise<void>
+  getMediaState(): Promise<MediaState>
+  controlMedia(action: MediaControlAction, value?: number): Promise<MediaState>
   onDisplaysChanged(callback: (displays: DisplayInfo[]) => void): () => void
   onSettingsChanged(callback: (settings: AppSettings) => void): () => void
 }

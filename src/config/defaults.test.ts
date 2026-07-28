@@ -23,6 +23,18 @@ describe('normalizeSettings', () => {
     }
     expect(normalizeSettings({ theme: 'downloaded-theme' }).theme).toBe('dark')
   })
+
+  it('normalizes explicit and automatic show-desktop preferences', () => {
+    expect(normalizeSettings({ profiles: [{ keepVisibleOnShowDesktop: true }] }).profiles[0].keepVisibleOnShowDesktop).toBe(true)
+    expect(normalizeSettings({ profiles: [{ keepVisibleOnShowDesktop: false }] }).profiles[0].keepVisibleOnShowDesktop).toBe(false)
+    expect(normalizeSettings({ profiles: [{}] }).profiles[0].keepVisibleOnShowDesktop).toBeUndefined()
+  })
+
+  it('hides to the tray by default and preserves an explicit close preference', () => {
+    expect(normalizeSettings({}).closeToTray).toBe(true)
+    expect(normalizeSettings({ closeToTray: true }).closeToTray).toBe(true)
+    expect(normalizeSettings({ closeToTray: false }).closeToTray).toBe(false)
+  })
 })
 
 describe('suggestGrid', () => {

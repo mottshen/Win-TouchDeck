@@ -3,8 +3,10 @@ import { SettingsPanel } from './components/SettingsPanel'
 import { LockScreen } from './components/LockScreen'
 import { SurfaceGrid } from './components/SurfaceGrid'
 import { Toolbar } from './components/Toolbar'
+import { MediaBar } from './components/MediaBar'
 import { DEFAULT_SETTINGS, normalizeSettings, selectProfile } from './config/defaults'
 import { useSurface } from './hooks/use-surface'
+import { useMediaSession } from './hooks/use-media-session'
 import { desktopBridge } from './platform/bridge'
 import type { AppSettings, DisplayInfo, RuntimeInfo } from './types'
 import './styles.css'
@@ -23,19 +25,14 @@ function Console({ settings, runtime, displays, onSettingsChange }: {
     [settings, runtime.displayId, requestedProfileId],
   )
   const { state, controller } = useSurface(settings.companionUrl, profile)
+  const media = useMediaSession(profile.showMediaBar)
   const [showSettings, setShowSettings] = useState(false)
   const onPress = useCallback((index: number, pressed: boolean) => controller.press(index, pressed), [controller])
 
   const toggleToolbar = useCallback(async () => {
-    const nextSettings: AppSettings = {
-      ...settings,
-      profiles: settings.profiles.map((item) => item.id === profile.id
-        ? { ...item, showToolbar: !item.showToolbar }
-        : item),
-    }
-    const saved = await desktopBridge.saveSettings(nextSettings)
+    const saved = await desktopBridge.setToolbarVisibility(profile.id, !profile.showToolbar)
     onSettingsChange(saved)
-  }, [onSettingsChange, profile.id, settings])
+  }, [onSettingsChange, profile.id, profile.showToolbar])
 
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
@@ -61,14 +58,21 @@ function Console({ settings, runtime, displays, onSettingsChange }: {
     })
   }, [profile.id, state.status, state.companionVersion, state.apiVersion, state.message])
 
-  const saveSettings = async (draft: AppSettings) => {
-    const saved = await desktopBridge.saveSettings(draft)
+  const saveSettings = async (draft: AppSettings, activeProfileId: string) => {
+    const saved = await desktopBridge.saveSettings(draft, activeProfileId)
     onSettingsChange(saved)
     setShowSettings(false)
   }
 
+  const deleteSurface = async (profileId: string) => {
+    if (profileId === profile.id) controller.remove()
+    const saved = await desktopBridge.deleteSurface(profileId)
+    onSettingsChange(saved)
+    return saved
+  }
+
   return (
-    <div className={`app-shell theme-${settings.theme} ${profile.showToolbar ? '' : 'toolbar-hidden'}`}>
+    <div className={`app-shell theme-${settings.theme}${profile.showToolbar ? '' : ' toolbar-hidden'}${profile.showMediaBar ? ' media-enabled' : ''}`}>
       {profile.showToolbar && (
         <Toolbar
           name={profile.name}
@@ -83,6 +87,7 @@ function Console({ settings, runtime, displays, onSettingsChange }: {
       )}
       {!profile.showToolbar && <button className="edge-settings" type="button" onClick={() => setShowSettings(true)} aria-label="Open settings" />}
       <SurfaceGrid profile={profile} buttons={state.buttons} brightness={state.brightness} onPress={onPress} />
+      {profile.showMediaBar && <MediaBar media={media.state} onControl={media.control} />}
       {state.locked && <LockScreen pinLength={state.pinLength} onKey={(key) => controller.pinKey(key)} />}
       {showSettings && (
         <SettingsPanel
@@ -91,6 +96,7 @@ function Console({ settings, runtime, displays, onSettingsChange }: {
           initialProfileId={profile.id}
           onCancel={() => setShowSettings(false)}
           onSave={saveSettings}
+          onDeleteSurface={deleteSurface}
           onExport={(draft) => desktopBridge.exportSettings(draft)}
           onImport={async () => {
             const imported = await desktopBridge.importSettings()

@@ -24,7 +24,11 @@ export function sanitizeSettings(input: unknown): AppSettings {
         gap: integer(profile.gap, 10, 0, 32),
         bitmapSize: integer(profile.bitmapSize, 144, 48, 512),
         kiosk: profile.kiosk === true,
+        keepVisibleOnShowDesktop: typeof profile.keepVisibleOnShowDesktop === 'boolean'
+          ? profile.keepVisibleOnShowDesktop
+          : undefined,
         showToolbar: profile.showToolbar !== false,
+        showMediaBar: profile.showMediaBar !== false,
       }))
     : structuredClone(FALLBACK_SETTINGS.profiles)
 
@@ -35,11 +39,21 @@ export function sanitizeSettings(input: unknown): AppSettings {
     companionUrl: /^(wss?:\/\/|mock:\/\/local$)/.test(companionUrl) ? companionUrl : FALLBACK_SETTINGS.companionUrl,
     adminUrl: /^https?:\/\//.test(adminUrl) ? adminUrl : FALLBACK_SETTINGS.adminUrl,
     launchAtLogin: source.launchAtLogin === true,
+    closeToTray: source.closeToTray !== false,
     preventDisplaySleep: source.preventDisplaySleep === true,
     theme: typeof source.theme === 'string' && themeIds.has(source.theme)
       ? source.theme as AppSettings['theme']
       : 'dark',
     profiles,
+  }
+}
+
+export function deleteSurfaceProfile(settings: AppSettings, profileId: unknown): AppSettings | null {
+  if (typeof profileId !== 'string' || settings.profiles.length <= 1) return null
+  if (!settings.profiles.some((profile) => profile.id === profileId)) return null
+  return {
+    ...settings,
+    profiles: settings.profiles.filter((profile) => profile.id !== profileId),
   }
 }
 

@@ -8,21 +8,26 @@ interface SettingsPanelProps {
   displays: DisplayInfo[]
   initialProfileId: string
   onCancel(): void
-  onSave(settings: AppSettings): Promise<void>
+  onSave(settings: AppSettings, activeProfileId: string): Promise<void>
+  onDeleteSurface(profileId: string): Promise<AppSettings>
   onExport(settings: AppSettings): Promise<{ saved: boolean; path?: string }>
   onImport(): Promise<void>
   onDiagnostics(): Promise<{ saved: boolean; path?: string }>
 }
 
-export function SettingsPanel({ settings, displays, initialProfileId, onCancel, onSave, onExport, onImport, onDiagnostics }: SettingsPanelProps) {
+export function SettingsPanel({ settings, displays, initialProfileId, onCancel, onSave, onDeleteSurface, onExport, onImport, onDiagnostics }: SettingsPanelProps) {
   const [draft, setDraft] = useState<AppSettings>(() => structuredClone(settings))
   const [profileId, setProfileId] = useState(initialProfileId)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [profilePendingDeletion, setProfilePendingDeletion] = useState<string | null>(null)
   const [operationMessage, setOperationMessage] = useState('')
   const profileIndex = Math.max(0, draft.profiles.findIndex((profile) => profile.id === profileId))
   const profile = draft.profiles[profileIndex]
   const selectedDisplay = useMemo(
-    () => displays.find((display) => display.id === profile?.displayId) ?? displays[0],
+    () => displays.find((display) => display.id === profile?.displayId)
+      ?? displays.find((display) => display.primary)
+      ?? displays[0],
     [displays, profile?.displayId],
   )
 
@@ -43,22 +48,37 @@ export function SettingsPanel({ settings, displays, initialProfileId, onCancel, 
         name: `Touch Surface ${current.profiles.length + 1}`,
         displayId: displays.find((display) => !current.profiles.some((item) => item.displayId === display.id))?.id ?? '',
         kiosk: false,
+        keepVisibleOnShowDesktop: undefined,
       }],
     }))
     setProfileId(id)
   }
 
-  const removeProfile = () => {
-    if (draft.profiles.length <= 1) return
-    const next = draft.profiles.filter((item) => item.id !== profile.id)
-    setDraft((current) => ({ ...current, profiles: next }))
-    setProfileId(next[0].id)
+  const confirmProfileDeletion = async () => {
+    if (!profilePendingDeletion || draft.profiles.length <= 1) return
+    setDeleting(true)
+    try {
+      const persisted = settings.profiles.some((item) => item.id === profilePendingDeletion)
+      if (persisted) {
+        const saved = await onDeleteSurface(profilePendingDeletion)
+        setDraft(structuredClone(saved))
+        setProfileId(saved.profiles[0].id)
+        setOperationMessage('Surface permanently deleted from TouchDeck and disconnected from Companion.')
+      } else {
+        const next = draft.profiles.filter((item) => item.id !== profilePendingDeletion)
+        setDraft((current) => ({ ...current, profiles: next }))
+        setProfileId(next[0].id)
+      }
+      setProfilePendingDeletion(null)
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const submit = async () => {
     setSaving(true)
     try {
-      await onSave(normalizeSettings(draft))
+      await onSave(normalizeSettings(draft), profile.id)
     } finally {
       setSaving(false)
     }
@@ -144,9 +164,31 @@ export function SettingsPanel({ settings, displays, initialProfileId, onCancel, 
             <div className="toggle-row">
               <label><input type="checkbox" checked={profile.enabled} onChange={(event) => updateProfile({ enabled: event.target.checked })} /><span>Enable This Display</span></label>
               <label><input type="checkbox" checked={profile.kiosk} onChange={(event) => updateProfile({ kiosk: event.target.checked })} /><span>Fullscreen Kiosk Mode</span></label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={profile.keepVisibleOnShowDesktop ?? selectedDisplay?.primary === false}
+                  onChange={(event) => updateProfile({ keepVisibleOnShowDesktop: event.target.checked })}
+                />
+                <span>Keep Visible When Showing Desktop</span>
+              </label>
               <label><input type="checkbox" checked={profile.showToolbar} onChange={(event) => updateProfile({ showToolbar: event.target.checked })} /><span>Show Top Toolbar (Press F9 to Toggle)</span></label>
+              <label><input type="checkbox" checked={profile.showMediaBar} onChange={(event) => updateProfile({ showMediaBar: event.target.checked })} /><span>Show Bottom Spotify Control Bar (On by Default)</span></label>
             </div>
-            <button type="button" className="danger-link" disabled={draft.profiles.length <= 1} onClick={removeProfile}>Delete Current Surface</button>
+            <div className="surface-delete-row">
+              <div>
+                <strong>Delete this Surface</strong>
+                <span>Removes it from TouchDeck permanently and disconnects it from Companion.</span>
+              </div>
+              <button
+                type="button"
+                className="danger-button"
+                disabled={draft.profiles.length <= 1 || deleting}
+                onClick={() => setProfilePendingDeletion(profile.id)}
+              >
+                Delete Surface
+              </button>
+            </div>
           </section>
 
           <section className="settings-section">
@@ -175,6 +217,7 @@ export function SettingsPanel({ settings, displays, initialProfileId, onCancel, 
             <div className="section-heading"><span>04</span><h2>Windows Runtime</h2></div>
             <div className="toggle-row">
               <label><input type="checkbox" checked={draft.launchAtLogin} onChange={(event) => setDraft({ ...draft, launchAtLogin: event.target.checked })} /><span>Launch After Windows Sign-In</span></label>
+              <label><input type="checkbox" checked={draft.closeToTray} onChange={(event) => setDraft({ ...draft, closeToTray: event.target.checked })} /><span>Hide to System Tray When Closing a Window</span></label>
               <label><input type="checkbox" checked={draft.preventDisplaySleep} onChange={(event) => setDraft({ ...draft, preventDisplaySleep: event.target.checked })} /><span>Keep Displays Awake While Running</span></label>
             </div>
             <div className="data-actions">
@@ -196,6 +239,21 @@ export function SettingsPanel({ settings, displays, initialProfileId, onCancel, 
           <p>Saving rebuilds affected surfaces after safely releasing any pressed buttons.</p>
           <div><button type="button" onClick={onCancel}>Cancel</button><button type="button" className="save-button" onClick={submit} disabled={saving}>{saving ? 'Saving...' : 'Save and Apply'}</button></div>
         </footer>
+        {profilePendingDeletion && (
+          <div className="confirm-overlay" role="presentation">
+            <section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-surface-title" aria-describedby="delete-surface-description">
+              <span className="confirm-kicker">PERMANENT ACTION</span>
+              <h2 id="delete-surface-title">Delete “{draft.profiles.find((item) => item.id === profilePendingDeletion)?.name}”?</h2>
+              <p id="delete-surface-description">This removes the Surface from TouchDeck immediately, disconnects it from Companion, and prevents it from returning after the next restart.</p>
+              <div>
+                <button type="button" disabled={deleting} onClick={() => setProfilePendingDeletion(null)}>Cancel</button>
+                <button type="button" className="danger-button" disabled={deleting} onClick={() => void confirmProfileDeletion()}>
+                  {deleting ? 'Deleting...' : 'Delete Permanently'}
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
       </section>
     </div>
   )

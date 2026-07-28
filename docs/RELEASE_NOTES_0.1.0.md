@@ -18,12 +18,20 @@ Win-TouchDeck source code and official binaries are licensed under the MIT Licen
 - Settings backup/recovery, import/export, privacy-redacted diagnostics, and legacy setting migration
 - Companion API capability negotiation with WebP support
 
+## Surface deletion
+
+- Added a prominent, confirmed **Delete Surface** action in TouchDeck settings.
+- Deleting a saved Surface takes effect immediately without requiring **Save and Apply**.
+- Deleted profiles are removed from the primary and backup settings files so they do not return after restart.
+- Active Companion Satellite devices send `REMOVE-DEVICE` before their TouchDeck window closes.
+- The final remaining Surface is protected from deletion.
+
 ## Verification
 
-- 10 automated test files and 25 tests passed
+- 14 automated test files and 46 tests passed
 - Electron packaged-window smoke test passed
 - CycloneDX production-dependency SBOM included and identifies the application license as MIT
-- Installer SHA-256: `5C20CFECA1F67A04A3BE87901023099C4854E7652D84599E0CDCDEB0D80CCDD9`
+- Installer SHA-256: `04A9B383D1770870E98A226119178A2CA94A4C5EC3E5706C81A28C35FFF174C9`
 
 ## Installation
 

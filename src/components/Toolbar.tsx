@@ -41,7 +41,7 @@ export function Toolbar(props: ToolbarProps) {
       </div>
       <div className="toolbar-actions">
         <button type="button" onClick={props.onAdmin}>COMPANION</button>
-        <button type="button" className="primary" onClick={props.onSettings}>Settings</button>
+        <button type="button" className="toolbar-settings" onClick={props.onSettings} aria-label="Settings" />
       </div>
     </header>
   )

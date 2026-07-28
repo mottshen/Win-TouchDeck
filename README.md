@@ -14,7 +14,7 @@ Current version: `0.1.0`
 - Safe release on touch cancellation, lost pointer capture, window blur, and focus changes
 - Simultaneous multi-touch presses
 - Companion PIN lock screen, brightness control, and page navigation
-- Windows fullscreen kiosk mode, launch at sign-in, and display sleep prevention
+- Windows fullscreen kiosk mode, secondary-surface visibility during Show Desktop, launch at sign-in, and display sleep prevention
 - Atomic settings writes, backup recovery, import/export, and exponential reconnect backoff
 - Privacy-redacted diagnostics export and a CycloneDX production-dependency SBOM
 

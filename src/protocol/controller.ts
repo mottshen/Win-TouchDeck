@@ -4,6 +4,7 @@ import { SatelliteSession, type SessionEffect, type SurfaceDescriptor } from './
 export interface SurfaceController {
   connect(): void
   disconnect(): void
+  remove(): void
   press(index: number, pressed: boolean): void
   changePage(direction: -1 | 1): void
   pinKey(key: number): void
@@ -25,6 +26,7 @@ export class CompanionSurfaceController implements SurfaceController {
   private heartbeatTimer?: ReturnType<typeof setInterval>
   private reconnectAttempt = 0
   private stopped = true
+  private registrationConflict = false
 
   constructor(
     private readonly url: string,
@@ -52,6 +54,10 @@ export class CompanionSurfaceController implements SurfaceController {
     socket?.close(1000, 'Surface closing')
   }
 
+  remove(): void {
+    this.send(this.session.remove())
+  }
+
   press(index: number, pressed: boolean): void {
     this.send(this.session.press(index, pressed))
   }
@@ -75,7 +81,6 @@ export class CompanionSurfaceController implements SurfaceController {
           socket.close(1000, 'Superseded connection')
           return
         }
-        this.reconnectAttempt = 0
         this.heartbeatTimer = setInterval(() => this.send(`PING win-touchdeck-${Date.now()}`), 2000)
       })
       socket.addEventListener('message', (event) => {
@@ -84,7 +89,20 @@ export class CompanionSurfaceController implements SurfaceController {
         text.split(/\r?\n/).forEach((line) => {
           if (!line.trim()) return
           this.callbacks.onTraffic?.('in', line)
-          this.applyEffects(this.session.receive(line))
+          const effects = this.session.receive(line)
+          this.applyEffects(effects)
+          if (effects.some((effect) =>
+            effect.type === 'state'
+            && effect.state.status === 'error'
+            && /device exists elsewhere/i.test(effect.state.message ?? '')
+          )) {
+            // A renderer reload can briefly overlap its previous Satellite
+            // socket. Companion keeps this socket open after rejecting
+            // ADD-DEVICE, so close it explicitly and register again once the
+            // superseded connection has gone away.
+            this.registrationConflict = true
+            socket.close(4000, 'Retrying duplicate device registration')
+          }
         })
       })
       socket.addEventListener('error', () => {
@@ -97,7 +115,10 @@ export class CompanionSurfaceController implements SurfaceController {
         if (this.heartbeatTimer) clearInterval(this.heartbeatTimer)
         this.heartbeatTimer = undefined
         if (this.stopped) return
-        this.applyEffects(this.session.disconnected())
+        this.applyEffects(this.session.disconnected(
+          this.registrationConflict ? 'Waiting for the previous surface connection to close' : undefined,
+        ))
+        this.registrationConflict = false
         this.scheduleReconnect()
       })
     } catch (error) {
@@ -126,6 +147,7 @@ export class CompanionSurfaceController implements SurfaceController {
     effects.forEach((effect) => {
       if (effect.type === 'send') this.send(effect.line)
       if (effect.type === 'state') this.callbacks.onState(effect.state)
+      if (effect.type === 'registered') this.reconnectAttempt = 0
     })
   }
 }

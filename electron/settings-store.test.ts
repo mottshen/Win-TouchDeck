@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { SettingsStore, sanitizeSettings } from './settings-store.js'
+import { deleteSurfaceProfile, SettingsStore, sanitizeSettings } from './settings-store.js'
 
 const temporaryDirectories: string[] = []
 
@@ -51,5 +51,52 @@ describe('SettingsStore recovery', () => {
     expect(sanitizeSettings({ theme: 'paper' }).theme).toBe('paper')
     expect(sanitizeSettings({ theme: 'neon' }).theme).toBe('neon')
     expect(sanitizeSettings({ theme: 'external' }).theme).toBe('dark')
+  })
+
+  it('preserves an explicit show-desktop preference and leaves old profiles on automatic defaults', () => {
+    expect(sanitizeSettings({
+      profiles: [{ id: 'secondary', keepVisibleOnShowDesktop: true }],
+    }).profiles[0].keepVisibleOnShowDesktop).toBe(true)
+    expect(sanitizeSettings({
+      profiles: [{ id: 'primary', keepVisibleOnShowDesktop: false }],
+    }).profiles[0].keepVisibleOnShowDesktop).toBe(false)
+    expect(sanitizeSettings({
+      profiles: [{ id: 'legacy' }],
+    }).profiles[0].keepVisibleOnShowDesktop).toBeUndefined()
+  })
+
+  it('enables close-to-tray for legacy settings and preserves an explicit opt-out', () => {
+    expect(sanitizeSettings({}).closeToTray).toBe(true)
+    expect(sanitizeSettings({ closeToTray: true }).closeToTray).toBe(true)
+    expect(sanitizeSettings({ closeToTray: false }).closeToTray).toBe(false)
+  })
+
+  it('permanently removes a selected surface while protecting the final surface', () => {
+    const settings = sanitizeSettings({
+      profiles: [
+        { id: 'surface-1', name: 'One' },
+        { id: 'surface-2', name: 'Two' },
+      ],
+    })
+    const deleted = deleteSurfaceProfile(settings, 'surface-2')
+    expect(deleted?.profiles.map((profile) => profile.id)).toEqual(['surface-1'])
+    expect(deleteSurfaceProfile(deleted!, 'surface-1')).toBeNull()
+    expect(deleteSurfaceProfile(settings, 'missing')).toBeNull()
+  })
+
+  it('does not restore a deleted surface from either settings file after restart', async () => {
+    const directory = await temporaryDirectory()
+    const store = new SettingsStore(directory)
+    const settings = await store.write({
+      profiles: [
+        { id: 'keep-me', name: 'Keep' },
+        { id: 'delete-me', name: 'Delete' },
+      ],
+    })
+    await store.write(deleteSurfaceProfile(settings, 'delete-me'))
+
+    const restarted = new SettingsStore(directory)
+    expect((await restarted.read()).profiles.map((profile) => profile.id)).toEqual(['keep-me'])
+    expect(JSON.parse(await readFile(path.join(directory, 'settings.backup.json'), 'utf8')).profiles).toHaveLength(1)
   })
 })

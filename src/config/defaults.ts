@@ -12,6 +12,7 @@ export const DEFAULT_PROFILE: SurfaceProfile = {
   bitmapSize: 144,
   kiosk: false,
   showToolbar: true,
+  showMediaBar: true,
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -19,6 +20,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   companionUrl: 'mock://local',
   adminUrl: 'http://127.0.0.1:8000',
   launchAtLogin: false,
+  closeToTray: true,
   preventDisplaySleep: false,
   theme: 'dark',
   profiles: [DEFAULT_PROFILE],
@@ -48,7 +50,11 @@ export function normalizeSettings(input: unknown): AppSettings {
           gap: clampInteger(item.gap, 10, 0, 32),
           bitmapSize: clampInteger(item.bitmapSize, 144, 48, 512),
           kiosk: item.kiosk === true,
+          keepVisibleOnShowDesktop: typeof item.keepVisibleOnShowDesktop === 'boolean'
+            ? item.keepVisibleOnShowDesktop
+            : undefined,
           showToolbar: item.showToolbar !== false,
+          showMediaBar: item.showMediaBar !== false,
         }
       })
     : [structuredClone(DEFAULT_PROFILE)]
@@ -63,6 +69,7 @@ export function normalizeSettings(input: unknown): AppSettings {
       : DEFAULT_SETTINGS.companionUrl,
     adminUrl: /^https?:\/\//.test(adminUrl) ? adminUrl : DEFAULT_SETTINGS.adminUrl,
     launchAtLogin: source.launchAtLogin === true,
+    closeToTray: source.closeToTray !== false,
     preventDisplaySleep: source.preventDisplaySleep === true,
     theme: isThemeId(source.theme) ? source.theme : 'dark',
     profiles,

@@ -57,6 +57,8 @@ describe('CompanionSurfaceController integration', () => {
     expect(states.at(-1)?.status).toBe('online')
     expect(socket.sent).toContain('KEY-PRESS DEVICEID=test KEY=4 PRESSED=true\n')
     expect(socket.sent).toContain('KEY-PRESS DEVICEID=test KEY=4 PRESSED=false\n')
+    controller.remove()
+    expect(socket.sent).toContain('REMOVE-DEVICE DEVICEID=test\n')
     controller.disconnect()
     vi.useRealTimers()
   })
@@ -87,6 +89,41 @@ describe('CompanionSurfaceController integration', () => {
     expect(states.at(-1)?.status).toBe('online')
     expect(sockets).toHaveLength(0)
     expect(second.sent.some((line) => line.startsWith('PING win-touchdeck-'))).toBe(true)
+
+    controller.disconnect()
+    vi.useRealTimers()
+  })
+
+  it('reconnects when Companion rejects an overlapping device registration', () => {
+    vi.useFakeTimers()
+    const first = new FakeSocket()
+    const second = new FakeSocket()
+    const sockets = [first, second]
+    const states: SurfaceState[] = []
+    const controller = new CompanionSurfaceController(
+      'ws://127.0.0.1:16623',
+      { id: 'test', name: 'Test', columns: 3, rows: 2, bitmapSize: 72 },
+      { onState: (state) => states.push(state) },
+      () => sockets.shift() as unknown as WebSocket,
+    )
+
+    controller.connect()
+    first.open()
+    first.message('BEGIN CompanionVersion=5.0.1 ApiVersion=1.12.0\nCAPS BITMAP_FORMATS=webp\n')
+    first.message('ERROR MESSAGE="Device exists elsewhere"\n')
+
+    expect(first.readyState).toBe(WebSocket.CLOSED)
+    expect(states.at(-1)).toMatchObject({
+      status: 'reconnecting',
+      message: 'Waiting for the previous surface connection to close',
+    })
+
+    vi.advanceTimersByTime(350)
+    second.open()
+    second.message('BEGIN CompanionVersion=5.0.1 ApiVersion=1.12.0\nCAPS BITMAP_FORMATS=webp\nADD-DEVICE OK\n')
+
+    expect(states.at(-1)?.status).toBe('online')
+    expect(sockets).toHaveLength(0)
 
     controller.disconnect()
     vi.useRealTimers()
