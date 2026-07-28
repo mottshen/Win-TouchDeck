@@ -1,5 +1,7 @@
 # Win-TouchDeck
 
+[**⬇️ Download the latest Win-TouchDeck release**](https://github.com/mottshen/Win-TouchDeck/releases/latest)
+
 Win-TouchDeck is an independently developed Windows touch-display client compatible with the Bitfocus Companion Surface protocol. It registers each configured display as a Surface and renders a touch-ready button grid for that display's resolution, scale factor, and orientation.
 
 Current version: `0.1.0`
